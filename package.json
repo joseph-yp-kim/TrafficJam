@@ -1,0 +1,35 @@
+{
+  "name": "traffic_jam",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js",
+    "build": "./node_modules/.bin/webpack -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joseph-yp-kim/TrafficJam.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joseph-yp-kim/TrafficJam/issues"
+  },
+  "homepage": "https://github.com/joseph-yp-kim/TrafficJam#readme",
+  "dependencies": {
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-react": "^6.22.0",
+    "body-parser": "^1.16.1",
+    "css-loader": "^0.26.1",
+    "ejs": "^2.5.5",
+    "express": "^4.14.1",
+    "nodemon": "^1.11.0",
+    "react": "^15.4.2",
+    "react-dom": "^15.4.2",
+    "style-loader": "^0.13.1",
+    "webpack": "^2.2.1"
+  }
+}
