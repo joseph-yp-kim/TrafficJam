@@ -2,7 +2,7 @@ import React from 'react';
 
 const GetRouteButton = (props) => {
   return (
-    <button className="route_button">Get Route Data</button>
+    <button className="route_button" name="getRouteData"  onClick={props.handleClick} >Get Route Data</button>
   );
 };
 

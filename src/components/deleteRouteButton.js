@@ -2,7 +2,7 @@ import React from 'react';
 
 const DeleteRouteButton = (props) => {
   return (
-    <button className="route_button">Delete Route</button>
+    <button className="route_button" name="deleteRoute" onClick={props.handleClick} >Delete Route</button>
   );
 };
 

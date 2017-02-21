@@ -12,10 +12,10 @@ class ButtonContainer extends Component {
   render() {
     return (
       <div id="button_container">
-        <GoButton />
-        <GetRouteButton />
-        <GetAllDataButton />
-        <DeleteRouteButton />
+        <GoButton handleClick={this.props.handleClick} />
+        <GetRouteButton handleClick={this.props.handleClick} />
+        <GetAllDataButton handleClick={this.props.handleClick} />
+        <DeleteRouteButton handleClick={this.props.handleClick} />
       </div>
     );
   }
