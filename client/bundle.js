@@ -9589,7 +9589,8 @@ var App = function (_Component) {
         originInput: {},
         destinationInput: {}
       },
-      travelInfo: {}
+      travelInfo: {},
+      data: []
     };
     _this.handleOInputChange = _this.handleOInputChange.bind(_this);
     _this.handleDInputChange = _this.handleDInputChange.bind(_this);
@@ -9618,7 +9619,9 @@ var App = function (_Component) {
   }, {
     key: 'handleClick',
     value: function handleClick(event) {
-      if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
+      if (event.currentTarget.name === 'getAllData') {
+        this.getAllData();
+      } else if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
         this.setState({ errorDisplay: true });
       } else if (!this.state.inputInfo.originInput.street || !this.state.inputInfo.destinationInput.street) {
         this.setState({ errorDisplay: true });
@@ -9662,7 +9665,7 @@ var App = function (_Component) {
   }, {
     key: 'addRoute',
     value: function addRoute() {
-      console.log('adding route to database');
+      // console.log('adding route to database');
       fetch('/routes', {
         method: 'POST',
         headers: {
@@ -9676,6 +9679,23 @@ var App = function (_Component) {
           normalTime: this.state.travelInfo.normalTime,
           distance: this.state.travelInfo.distance
         })
+      });
+    }
+  }, {
+    key: 'getAllData',
+    value: function getAllData() {
+      var _this3 = this;
+
+      fetch('/routes', {
+        method: 'GET'
+      }).then(function (res) {
+        return res.json();
+      }).then(function (resJSON) {
+        // console.log(resJSON);
+        _this3.setState({
+          dataDisplay: true,
+          data: resJSON
+        });
       });
     }
   }, {
@@ -9710,7 +9730,7 @@ var App = function (_Component) {
         appDiv.push(_react2.default.createElement(_routeContainer2.default, { travelInfo: this.state.travelInfo, handleClick: this.handleClick }));
       }
       if (this.state.dataDisplay === true) {
-        appDiv.push(_react2.default.createElement(_dataContainer2.default, null));
+        appDiv.push(_react2.default.createElement(_dataContainer2.default, { data: this.state.data }));
       }
       return _react2.default.createElement(
         'div',
@@ -10009,6 +10029,14 @@ var _react = __webpack_require__(6);
 
 var _react2 = _interopRequireDefault(_react);
 
+var _dataTableHeader = __webpack_require__(199);
+
+var _dataTableHeader2 = _interopRequireDefault(_dataTableHeader);
+
+var _dataTableRow = __webpack_require__(200);
+
+var _dataTableRow2 = _interopRequireDefault(_dataTableRow);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -10029,10 +10057,28 @@ var DataContainer = function (_Component) {
   _createClass(DataContainer, [{
     key: 'render',
     value: function render() {
+      var dataRows = [];
+      for (var i = 0; i < this.props.data.length; i += 1) {
+        console.log(this.props.data[i]);
+        dataRows.push(_react2.default.createElement(_dataTableRow2.default, { data: this.props.data[i] }));
+      }
       return _react2.default.createElement(
         'div',
-        null,
-        'data'
+        { id: 'data_container' },
+        _react2.default.createElement(
+          'table',
+          { id: 'data_table' },
+          _react2.default.createElement(
+            'thead',
+            null,
+            _react2.default.createElement(_dataTableHeader2.default, null)
+          ),
+          _react2.default.createElement(
+            'tbody',
+            null,
+            dataRows
+          )
+        )
       );
     }
   }]);
@@ -10385,7 +10431,7 @@ exports = module.exports = __webpack_require__(100)();
 
 
 // module
-exports.push([module.i, "body {\n  margin: 0px;\n  padding: 0px;\n  height: 100%;\n  font-family: Quicksand;\n}\n#title {\n  text-align: center;\n}\n#form_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 600px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#form_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n.OD_container {\n  display: flex;\n  flex-direction: column;\n  justify-content: space-around;\n  height: 175px;\n  width: 275px;\n}\n.form_title {\n  text-align: center;\n}\n.input_line {\n  display: flex;\n  justify-content: space-between;\n}\n.input_line input {\n  font-size: 14px;\n  height: 20px;\n  width: 190px;\n  border: 2px;\n}\n.input_line input:focus {\n  outline: none;\n}\n#button_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  height: 36px;\n  width: 500px;\n  margin: 20px auto;\n}\n.route_button {\n  font-size: 14px;\n  height: 34px;\n  padding: 8px;\n  background-color: white;\n  border-radius: 1px; \n  border: solid 1px white;\n  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);\n}\n.route_button:focus {\n  outline:0;\n}\n.route_button:hover {\n  border: solid 1px #F0F0F0;\n  background-color: #F0F0F0;\n}\n.error_message {\n  font-style: italic;\n  color: red;\n  text-align: center;\n}\n#route_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 500px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#route_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}", ""]);
+exports.push([module.i, "body {\n  margin: 0px;\n  padding: 0px;\n  height: 100%;\n  font-family: Quicksand;\n}\n#title {\n  text-align: center;\n}\n#form_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 600px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#form_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n.OD_container {\n  display: flex;\n  flex-direction: column;\n  justify-content: space-around;\n  height: 175px;\n  width: 275px;\n}\n.form_title {\n  text-align: center;\n}\n.input_line {\n  display: flex;\n  justify-content: space-between;\n}\n.input_line input {\n  font-size: 14px;\n  height: 20px;\n  width: 190px;\n  border: 2px;\n}\n.input_line input:focus {\n  outline: none;\n}\n#button_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  height: 36px;\n  width: 500px;\n  margin: 20px auto;\n}\n.route_button {\n  font-size: 14px;\n  height: 34px;\n  padding: 8px;\n  background-color: white;\n  border-radius: 1px; \n  border: solid 1px white;\n  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);\n}\n.route_button:focus {\n  outline:0;\n}\n.route_button:hover {\n  border: solid 1px #F0F0F0;\n  background-color: #F0F0F0;\n}\n.error_message {\n  font-style: italic;\n  color: red;\n  text-align: center;\n}\n#route_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 500px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#route_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#data_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: auto;\n  max-width: 1200px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#data_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#data_table {\n  color: black;\n  display: table;\n  margin: 5px auto;\n  height: auto;\n  width: auto;\n  position: relative;\n  padding: 10px;\n  border-radius: 5px;\n  border-collapse: collapse;\n}\n#data_table th {\n  /*font-weight: 600;*/\n  font-style: italic;\n}\n#data_table td {\n  width: auto;\n  height: auto;\n  text-align: center;\n  border-top: 1px black solid;\n  padding: 5px;\n}", ""]);
 
 // exports
 
@@ -22952,6 +22998,119 @@ var _style2 = _interopRequireDefault(_style);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _reactDom.render)(_react2.default.createElement(_App2.default, null), document.getElementById('root'));
+
+/***/ }),
+/* 199 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DataTableHeader = function DataTableHeader(props) {
+  return _react2.default.createElement(
+    'tr',
+    null,
+    _react2.default.createElement(
+      'th',
+      null,
+      'ID'
+    ),
+    _react2.default.createElement(
+      'th',
+      null,
+      'Origin'
+    ),
+    _react2.default.createElement(
+      'th',
+      null,
+      'Destination'
+    ),
+    _react2.default.createElement(
+      'th',
+      null,
+      'Distance (mi)'
+    ),
+    _react2.default.createElement(
+      'th',
+      null,
+      'Live Travel Time (min)'
+    ),
+    _react2.default.createElement(
+      'th',
+      null,
+      'Normal Travel Time (min)'
+    )
+  );
+};
+
+exports.default = DataTableHeader;
+
+/***/ }),
+/* 200 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(6);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var DataTableRow = function DataTableRow(props) {
+  // console.log('props:', props);
+  return _react2.default.createElement(
+    'tr',
+    null,
+    _react2.default.createElement(
+      'td',
+      null,
+      props.data.__v
+    ),
+    _react2.default.createElement(
+      'td',
+      null,
+      props.data.origin
+    ),
+    _react2.default.createElement(
+      'td',
+      null,
+      props.data.destination
+    ),
+    _react2.default.createElement(
+      'td',
+      null,
+      props.data.distance
+    ),
+    _react2.default.createElement(
+      'td',
+      null,
+      props.data.liveTime
+    ),
+    _react2.default.createElement(
+      'td',
+      null,
+      props.data.normalTime
+    )
+  );
+};
+
+exports.default = DataTableRow;
 
 /***/ })
 /******/ ]);

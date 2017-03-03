@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import DataTableHeader from './../components/dataTableHeader.js';
+import DataTableRow from './../components/dataTableRow.js';
 
 class DataContainer extends Component {
   constructor(props) {
@@ -6,8 +8,22 @@ class DataContainer extends Component {
   }
 
   render() {
+    const dataRows = [];
+    for (let i = 0; i < this.props.data.length; i += 1) {
+      console.log(this.props.data[i]);
+      dataRows.push(<DataTableRow data={this.props.data[i]} />)
+    }
     return (
-      <div>data</div>
+      <div id="data_container">
+        <table id="data_table">
+          <thead>
+            <DataTableHeader />
+          </thead>
+          <tbody>
+            {dataRows}
+          </tbody>
+        </table>
+      </div>
     );
   }
 }

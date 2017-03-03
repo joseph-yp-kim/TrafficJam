@@ -16,7 +16,8 @@ class App extends Component {
         originInput: {},
         destinationInput: {}
       },
-      travelInfo : {}
+      travelInfo : {},
+      data : [],
     };
     this.handleOInputChange = this.handleOInputChange.bind(this);
     this.handleDInputChange = this.handleDInputChange.bind(this);
@@ -40,7 +41,9 @@ class App extends Component {
   }
 
   handleClick(event) {
-    if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
+    if (event.currentTarget.name === 'getAllData') {
+      this.getAllData();
+    } else if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
       this.setState({errorDisplay: true});
     } else if (!this.state.inputInfo.originInput.street || !this.state.inputInfo.destinationInput.street) {
       this.setState({errorDisplay: true});
@@ -80,7 +83,7 @@ class App extends Component {
   }
 
   addRoute() {
-    console.log('adding route to database');
+    // console.log('adding route to database');
     fetch('/routes', {
       method: 'POST',
       headers: {
@@ -93,6 +96,20 @@ class App extends Component {
         liveTime: this.state.travelInfo.liveTime,
         normalTime: this.state.travelInfo.normalTime,
         distance: this.state.travelInfo.distance,
+      })
+    });
+  }
+
+  getAllData() {
+    fetch('/routes', {
+      method: 'GET'
+    })
+    .then(res => res.json())
+    .then(resJSON => {
+      // console.log(resJSON);
+      this.setState({
+        dataDisplay : true,
+        data : resJSON
       })
     });
   }
@@ -122,7 +139,7 @@ class App extends Component {
       appDiv.push(<RouteContainer travelInfo={this.state.travelInfo} handleClick={this.handleClick} />);
     }
     if (this.state.dataDisplay === true) {
-      appDiv.push(<DataContainer />);
+      appDiv.push(<DataContainer data={this.state.data} />);
     }
     return (
       <div>{appDiv}</div>

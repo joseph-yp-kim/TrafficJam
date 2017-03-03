@@ -6,29 +6,28 @@ const Routes = require('./model.js');
 const db = {};
 
 db.create = (req, res) => {
-  Routes.sync().then(() => {
-    const data = req.body;
-    console.log(data);
-    Routes.create({
-      origin: data.origin,
-      destination: data.destination,
-      distance: data.distance,
-      liveCommute: data.liveCommute,
-      usualCommute: data.usualCommute
-    });
+  const data = req.body;
+  console.log('DATA:', data);
+  Routes.create(data, (err, route) => {
+    if (err) {
+      res.statusCode = 400;
+      return res.send(err);
+    } else {
+      res.statusCode = 200;
+      return res.send('data saved');
+    }
   });
 };
 
 db.findAll = (req, res) => {
-  Routes.sync().then(() => {
-    Routes.findAll()
-      .then(data => {
-        const arr = [];
-        for (let i = 0; i < data.length; i += 1) {
-          arr.push(data[i].dataValues);
-        }
-        res.json(JSON.stringify(arr));
-      });
+  Routes.find({}, (err, routes) => {
+    if (err) {
+      res.statusCode = 400;
+      return res.send(err);
+    } else {
+      res.statusCode = 200;
+      return res.send(routes);
+    }
   });
 }
 
