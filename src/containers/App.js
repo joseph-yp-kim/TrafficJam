@@ -3,6 +3,7 @@ import InputFormContainer from './inputFormContainer';
 import DataContainer from './dataContainer';
 import ButtonContainer from './buttonContainer';
 import RouteContainer from './routeContainer';
+import RoutesContainer from './routesContainer';
 import ErrorMessage from './../components/errorMessage';
 
 class App extends Component {
@@ -11,12 +12,14 @@ class App extends Component {
     this.state = {
       errorDisplay: false,
       routeDisplay : false,
-      dataDisplay: false, 
+      routesDisplay : false,
+      dataDisplay: false,
       inputInfo : {
         originInput: {},
         destinationInput: {}
       },
       travelInfo : {},
+      routes : [],
       data : [],
     };
     this.handleOInputChange = this.handleOInputChange.bind(this);
@@ -43,6 +46,8 @@ class App extends Component {
   handleClick(event) {
     if (event.currentTarget.name === 'getAllData') {
       this.getAllData();
+    } else if (event.currentTarget.name === 'seeRoutes') {
+      this.getRoutes();
     } else if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
       this.setState({errorDisplay: true});
     } else if (!this.state.inputInfo.originInput.street || !this.state.inputInfo.destinationInput.street) {
@@ -100,15 +105,44 @@ class App extends Component {
     });
   }
 
-  getAllData() {
+  getRoutes() {
     fetch('/routes', {
       method: 'GET'
     })
     .then(res => res.json())
     .then(resJSON => {
       // console.log(resJSON);
+      const routes = [];
+      for (let i = 0; i < resJSON.length; i += 1) {
+        let count = 0;
+        routes.forEach((route) => {
+          if (resJSON[i].origin === route[0] && resJSON[i].destination === route[1]) {
+            count += 1;
+          }
+        });
+        if (count === 0) routes.push([resJSON[i].origin, resJSON[i].destination])
+      }
+      console.log(routes);
       this.setState({
+        errorDisplay: false,
+        dataDisplay : false,
+        routesDisplay: true,
+        routes: routes,
+      })
+    });
+  }
+
+  getAllData() {
+    fetch('/routes', {
+      method: 'GET'
+    })
+    .then(res => res.json())
+    .then(resJSON => {
+      console.log(resJSON);
+      this.setState({
+        errorDisplay: false,
         dataDisplay : true,
+        routesDisplay: false,
         data : resJSON
       })
     });
@@ -137,6 +171,9 @@ class App extends Component {
     }
     if (this.state.routeDisplay === true) {
       appDiv.push(<RouteContainer travelInfo={this.state.travelInfo} handleClick={this.handleClick} />);
+    }
+    if (this.state.routesDisplay === true) {
+      appDiv.push(<RoutesContainer routes={this.state.routes} handleClick={this.handleClick} />);
     }
     if (this.state.dataDisplay === true) {
       appDiv.push(<DataContainer data={this.state.data} />);

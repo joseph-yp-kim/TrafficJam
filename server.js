@@ -18,12 +18,6 @@ app.get('/routes', db.findAll);
 
 app.post('/routes', db.create);
 
-app.get('/api/routes', db.find);
-
-app.delete('/api/routes', db.delete);
-
-app.delete('/routes', db.deleteAll);
-
 const port = process.env.PORT || 3000;
 
 app.listen(port, () => {
