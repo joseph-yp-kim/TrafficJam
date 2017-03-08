@@ -9594,6 +9594,7 @@ var App = function (_Component) {
         originInput: {},
         destinationInput: {}
       },
+      selectedRoute: {},
       travelInfo: {},
       routes: [],
       data: []
@@ -9601,6 +9602,7 @@ var App = function (_Component) {
     _this.handleOInputChange = _this.handleOInputChange.bind(_this);
     _this.handleDInputChange = _this.handleDInputChange.bind(_this);
     _this.handleClick = _this.handleClick.bind(_this);
+    _this.routeSelector = _this.routeSelector.bind(_this);
     return _this;
   }
 
@@ -9629,7 +9631,22 @@ var App = function (_Component) {
         this.getAllData();
       } else if (event.currentTarget.name === 'seeRoutes') {
         this.getRoutes();
-      } else if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
+      } else if (event.currentTarget.name === 'getRouteData') {
+        this.getRouteData();
+      } else if (event.currentTarget.name === 'deleteRoute') {
+        this.deleteRoute();
+      } else if (event.currentTarget.name === 'go') {
+        this.googleMapAPI(this.state.inputInfo.originInput, this.state.inputInfo.destinationInput);
+      } else if (event.currentTarget.name === 'addRoute') {
+        this.addRoute();
+      }
+    }
+  }, {
+    key: 'googleMapAPI',
+    value: function googleMapAPI(origin, destination) {
+      var _this2 = this;
+
+      if (!this.state.inputInfo.originInput.streetNum || !this.state.inputInfo.destinationInput.streetNum) {
         this.setState({ errorDisplay: true });
       } else if (!this.state.inputInfo.originInput.street || !this.state.inputInfo.destinationInput.street) {
         this.setState({ errorDisplay: true });
@@ -9638,37 +9655,26 @@ var App = function (_Component) {
       } else if (!this.state.inputInfo.originInput.state || !this.state.inputInfo.destinationInput.state) {
         this.setState({ errorDisplay: true });
       } else {
-        if (event.currentTarget.name === 'go') {
-          this.googleMapAPI(this.state.inputInfo.originInput, this.state.inputInfo.destinationInput);
-        } else if (event.currentTarget.name === 'addRoute') {
-          this.addRoute();
-        }
-      }
-    }
-  }, {
-    key: 'googleMapAPI',
-    value: function googleMapAPI(origin, destination) {
-      var _this2 = this;
-
-      var url = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + origin.streetNum + '+' + origin.street + '+' + origin.city + '+' + origin.state + '&destination=' + destination.streetNum + '+' + destination.street + '+' + destination.city + '+' + destination.state + '&departure_time=now&key=AIzaSyAyfCjnOQZeHPfVgw0JEBwDPFxsbVKEzkc';
-      console.log(url);
-      fetch(url).then(function (res) {
-        return res.json();
-      }).then(function (resJSON) {
-        console.log(resJSON);
-        _this2.setState({
-          errorDisplay: false,
-          routeDisplay: true,
-          travelInfo: {
-            oAddress: resJSON.routes[0].legs[0].start_address,
-            dAddress: resJSON.routes[0].legs[0].end_address,
-            liveTime: _this2.strToNum(resJSON.routes[0].legs[0].duration_in_traffic.text),
-            normalTime: _this2.strToNum(resJSON.routes[0].legs[0].duration.text),
-            distance: parseInt(resJSON.routes[0].legs[0].distance.text)
-          }
+        var url = 'https://maps.googleapis.com/maps/api/directions/json?origin=' + origin.streetNum + '+' + origin.street + '+' + origin.city + '+' + origin.state + '&destination=' + destination.streetNum + '+' + destination.street + '+' + destination.city + '+' + destination.state + '&departure_time=now&key=AIzaSyAyfCjnOQZeHPfVgw0JEBwDPFxsbVKEzkc';
+        console.log(url);
+        fetch(url).then(function (res) {
+          return res.json();
+        }).then(function (resJSON) {
+          console.log(resJSON);
+          _this2.setState({
+            errorDisplay: false,
+            routeDisplay: true,
+            travelInfo: {
+              oAddress: resJSON.routes[0].legs[0].start_address,
+              dAddress: resJSON.routes[0].legs[0].end_address,
+              liveTime: _this2.strToNum(resJSON.routes[0].legs[0].duration_in_traffic.text),
+              normalTime: _this2.strToNum(resJSON.routes[0].legs[0].duration.text),
+              distance: parseInt(resJSON.routes[0].legs[0].distance.text)
+            }
+          });
+          // console.log(this.state.travelInfo);
         });
-        console.log(_this2.state.travelInfo);
-      });
+      }
     }
   }, {
     key: 'addRoute',
@@ -9715,11 +9721,12 @@ var App = function (_Component) {
         for (var i = 0; i < resJSON.length; i += 1) {
           _loop(i);
         }
-        console.log(routes);
+        // console.log(routes);
         _this3.setState({
           errorDisplay: false,
           dataDisplay: false,
           routesDisplay: true,
+          routeDisplay: false,
           routes: routes
         });
       });
@@ -9734,13 +9741,65 @@ var App = function (_Component) {
       }).then(function (res) {
         return res.json();
       }).then(function (resJSON) {
-        console.log(resJSON);
+        // console.log(resJSON);
         _this4.setState({
           errorDisplay: false,
           dataDisplay: true,
           routesDisplay: false,
           data: resJSON
         });
+      });
+    }
+  }, {
+    key: 'routeSelector',
+    value: function routeSelector(org, dest, index) {
+      this.setState({
+        selectedRoute: {
+          origin: org,
+          destination: dest,
+          index: index
+        }
+      });
+    }
+  }, {
+    key: 'getRouteData',
+    value: function getRouteData() {
+      var _this5 = this;
+
+      var url1 = '/route?oAdd=' + this.state.selectedRoute.origin + '&dAdd=' + this.state.selectedRoute.destination;
+      fetch(url1, {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).then(function (res) {
+        return res.json();
+      }).then(function (resJSON) {
+        _this5.setState({
+          errorDisplay: false,
+          dataDisplay: true,
+          routesDisplay: false,
+          data: resJSON
+        });
+      });
+    }
+  }, {
+    key: 'deleteRoute',
+    value: function deleteRoute() {
+      var _this6 = this;
+
+      var url1 = '/route?oAdd=' + this.state.selectedRoute.origin + '&dAdd=' + this.state.selectedRoute.destination;
+      fetch(url1, {
+        method: 'DELETE',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      }).then(function (res) {
+        return res.json();
+      }).then(function (resJSON) {
+        _this6.getRoutes();
       });
     }
   }, {
@@ -9775,7 +9834,7 @@ var App = function (_Component) {
         appDiv.push(_react2.default.createElement(_routeContainer2.default, { travelInfo: this.state.travelInfo, handleClick: this.handleClick }));
       }
       if (this.state.routesDisplay === true) {
-        appDiv.push(_react2.default.createElement(_routesContainer2.default, { routes: this.state.routes, handleClick: this.handleClick }));
+        appDiv.push(_react2.default.createElement(_routesContainer2.default, { routes: this.state.routes, selectedRoute: this.state.selectedRoute, routeSelector: this.routeSelector, handleClick: this.handleClick }));
       }
       if (this.state.dataDisplay === true) {
         appDiv.push(_react2.default.createElement(_dataContainer2.default, { data: this.state.data }));
@@ -10122,26 +10181,21 @@ var _react2 = _interopRequireDefault(_react);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var Routes = function Routes(props) {
-  var style = {
-    'font-style': 'italic'
-  };
   return _react2.default.createElement(
-    'tr',
-    null,
+    "tr",
+    { className: "route_row", onClick: function onClick(e) {
+        e.stopPropagation();
+        props.routeSelector(props.route[0], props.route[1], props.index);
+      } },
     _react2.default.createElement(
-      'td',
+      "td",
       null,
-      _react2.default.createElement(
-        'span',
-        { style: style },
-        props.route[0]
-      ),
-      ' => ',
-      _react2.default.createElement(
-        'span',
-        { style: style },
-        props.route[1]
-      )
+      props.route[0]
+    ),
+    _react2.default.createElement(
+      "td",
+      null,
+      props.route[1]
     )
   );
 };
@@ -10286,7 +10340,7 @@ var DataContainer = function (_Component) {
     value: function render() {
       var dataRows = [];
       for (var i = 0; i < this.props.data.length; i += 1) {
-        dataRows.push(_react2.default.createElement(_dataTableRow2.default, { data: this.props.data[i] }));
+        dataRows.push(_react2.default.createElement(_dataTableRow2.default, { key: i, data: this.props.data[i] }));
       }
       return _react2.default.createElement(
         'div',
@@ -10677,6 +10731,10 @@ var _routes = __webpack_require__(95);
 
 var _routes2 = _interopRequireDefault(_routes);
 
+var _selectedRoute = __webpack_require__(204);
+
+var _selectedRoute2 = _interopRequireDefault(_selectedRoute);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -10699,7 +10757,11 @@ var RoutesContainer = function (_Component) {
     value: function render() {
       var routes = [];
       for (var i = 0; i < this.props.routes.length; i += 1) {
-        routes.push(_react2.default.createElement(_routes2.default, { route: this.props.routes[i] }));
+        if (this.props.selectedRoute.hasOwnProperty('index') && i === this.props.selectedRoute.index) {
+          routes.push(_react2.default.createElement(_selectedRoute2.default, { key: i, index: i, route: this.props.routes[i], routeSelector: this.props.routeSelector }));
+        } else {
+          routes.push(_react2.default.createElement(_routes2.default, { key: i, index: i, route: this.props.routes[i], routeSelector: this.props.routeSelector }));
+        }
       }
       return _react2.default.createElement(
         'div',
@@ -10716,14 +10778,32 @@ var RoutesContainer = function (_Component) {
             'table',
             { id: 'routes_table' },
             _react2.default.createElement(
+              'thead',
+              null,
+              _react2.default.createElement(
+                'tr',
+                null,
+                _react2.default.createElement(
+                  'th',
+                  null,
+                  'Origin'
+                ),
+                _react2.default.createElement(
+                  'th',
+                  null,
+                  'Destination'
+                )
+              )
+            ),
+            _react2.default.createElement(
               'tbody',
               null,
               routes
             )
           )
         ),
-        _react2.default.createElement(_getRouteButton2.default, null),
-        _react2.default.createElement(_deleteRouteButton2.default, null)
+        _react2.default.createElement(_getRouteButton2.default, { handleClick: this.props.handleClick }),
+        _react2.default.createElement(_deleteRouteButton2.default, { handleClick: this.props.handleClick })
       );
     }
   }]);
@@ -10742,7 +10822,7 @@ exports = module.exports = __webpack_require__(105)();
 
 
 // module
-exports.push([module.i, "body {\n  margin: 0px;\n  padding: 0px;\n  height: 100%;\n  font-family: Quicksand;\n}\n#title {\n  text-align: center;\n}\nh3 {\n  text-align: center;\n}\n#form_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 600px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#form_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n.OD_container {\n  display: flex;\n  flex-direction: column;\n  justify-content: space-around;\n  height: 175px;\n  width: 275px;\n}\n.form_title {\n  text-align: center;\n}\n.input_line {\n  display: flex;\n  justify-content: space-between;\n}\n.input_line input {\n  font-size: 14px;\n  height: 20px;\n  width: 190px;\n  border: 2px;\n}\n.input_line input:focus {\n  outline: none;\n}\n#button_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  height: 36px;\n  width: 300px;\n  margin: 20px auto;\n}\n.route_button {\n  font-size: 14px;\n  height: 34px;\n  padding: 8px;\n  background-color: white;\n  border-radius: 1px; \n  border: solid 1px white;\n  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);\n}\n.route_button:focus {\n  outline:0;\n}\n.route_button:hover {\n  border: solid 1px #F0F0F0;\n  background-color: #F0F0F0;\n}\n.error_message {\n  font-style: italic;\n  color: red;\n  text-align: center;\n}\n#route_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 500px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#route_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#routes_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: 250px;\n  width: 900px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#routes_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#routes_scroll {\n  height:100px;\n  overflow: auto;\n}\n#routes_table {\n  color: black;\n  display: table;\n  margin: 5px auto;\n  height: auto;\n  width: auto;\n  position: relative;\n  padding: 10px;\n  border-radius: 5px;\n  border-collapse: collapse;\n}\n#routes_table th {\n  /*font-weight: 600;*/\n  font-style: italic;\n}\n#routes_table td {\n  width: auto;\n  height: auto;\n  text-align: center;\n  border: 1px black solid;\n  padding: 5px;\n}\n#data_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: auto;\n  max-width: 1200px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#data_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#data_table {\n  color: black;\n  display: table;\n  margin: 5px auto;\n  height: auto;\n  width: auto;\n  position: relative;\n  padding: 10px;\n  border-radius: 5px;\n  border-collapse: collapse;\n}\n#data_table th {\n  /*font-weight: 600;*/\n  font-style: italic;\n}\n#data_table td {\n  width: auto;\n  height: auto;\n  text-align: center;\n  border-top: 1px black solid;\n  padding: 5px;\n}", ""]);
+exports.push([module.i, "body {\n  margin: 0px;\n  padding: 0px;\n  height: 100%;\n  font-family: Quicksand;\n}\n#title {\n  text-align: center;\n}\nh3 {\n  text-align: center;\n}\n#form_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 600px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#form_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n.OD_container {\n  display: flex;\n  flex-direction: column;\n  justify-content: space-around;\n  height: 175px;\n  width: 275px;\n}\n.form_title {\n  text-align: center;\n}\n.input_line {\n  display: flex;\n  justify-content: space-between;\n}\n.input_line input {\n  font-size: 14px;\n  height: 20px;\n  width: 190px;\n  border: 2px;\n}\n.input_line input:focus {\n  outline: none;\n}\n#button_container {\n  position: relative;\n  display: flex;\n  justify-content: space-around;\n  height: 36px;\n  width: 300px;\n  margin: 20px auto;\n}\n.route_button {\n  font-size: 14px;\n  height: 34px;\n  padding: 8px;\n  background-color: white;\n  border-radius: 1px; \n  border: solid 1px white;\n  box-shadow: 0 2px 2px 0 rgba(0,0,0,0.14), 0 1px 5px 0 rgba(0,0,0,0.12), 0 3px 1px -2px rgba(0,0,0,0.2);\n}\n.route_button:focus {\n  outline:0;\n}\n.route_button:hover {\n  border: solid 1px #F0F0F0;\n  background-color: #F0F0F0;\n}\n.error_message {\n  font-style: italic;\n  color: red;\n  text-align: center;\n}\n#route_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: 175px;\n  width: 500px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#route_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#routes_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: 250px;\n  width: 900px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#routes_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n.route_row:hover {\n  cursor: pointer; \n  background-color: #272822;\n  color: white;\n}\n.selected_row {\n  background-color: #272822;\n  color: white;\n}\n#routes_scroll {\n  height:100px;\n  overflow: auto;\n}\n#routes_table {\n  color: black;\n  display: table;\n  margin: 5px auto;\n  height: auto;\n  width: auto;\n  position: relative;\n  padding: 10px;\n  border-radius: 5px;\n  border-collapse: collapse;\n}\n#routes_table th {\n  /*font-weight: 600;*/\n  font-style: italic;\n}\n#routes_table td {\n  width: auto;\n  height: auto;\n  text-align: center;\n  border: 1px black solid;\n  padding: 5px;\n}\n#data_container {\n  position: relative;\n  display: flex;\n  padding: 10px;\n  flex-direction: column;\n  justify-content: space-around;\n  top: 0px;\n  height: auto;\n  max-width: 1200px;\n  margin: 0px auto;\n  background-color: #F6F6F6;\n  border-radius: 2px; \n  box-shadow: 0 2px 4px rgba(0,0,0,0.12), 0 2px 5px rgba(0,0,0,0.24);\n  transition: box-shadow 0.2s ease-in-out;\n}\n#data_container:hover {\n  box-shadow: 0 6px 12px rgba(0,0,0,0.25), 0 6px 15px rgba(0,0,0,0.22);\n}\n#data_table {\n  color: black;\n  display: table;\n  margin: 5px auto;\n  height: auto;\n  width: auto;\n  position: relative;\n  padding: 10px;\n  border-radius: 5px;\n  border-collapse: collapse;\n}\n#data_table th {\n  /*font-weight: 600;*/\n  font-style: italic;\n}\n#data_table td {\n  width: auto;\n  height: auto;\n  text-align: center;\n  border-top: 1px black solid;\n  padding: 5px;\n}", ""]);
 
 // exports
 
@@ -23309,6 +23389,45 @@ var _style2 = _interopRequireDefault(_style);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 (0, _reactDom.render)(_react2.default.createElement(_App2.default, null), document.getElementById('root'));
+
+/***/ }),
+/* 204 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(4);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var Routes = function Routes(props) {
+  return _react2.default.createElement(
+    "tr",
+    { className: "selected_row", onClick: function onClick(e) {
+        e.stopPropagation();
+        props.routeSelector(props.route[0], props.route[1], props.index);
+      } },
+    _react2.default.createElement(
+      "td",
+      null,
+      props.route[0]
+    ),
+    _react2.default.createElement(
+      "td",
+      null,
+      props.route[1]
+    )
+  );
+};
+
+exports.default = Routes;
 
 /***/ })
 /******/ ]);
