@@ -18,11 +18,9 @@ app.get('/routes', db.findAll);
 
 app.post('/routes', db.create);
 
-app.get('/api/routes', db.find);
+app.get('/route', db.find);
 
-app.delete('/api/routes', db.delete);
-
-app.delete('/routes', db.deleteAll);
+app.delete('/route', db.delete);
 
 const port = process.env.PORT || 3000;
 

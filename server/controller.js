@@ -34,43 +34,34 @@ db.findAll = (req, res) => {
 db.find = (req, res) => {
   const oAdd = req.param('oAdd');
   const dAdd = req.param('dAdd');
-  Routes.sync().then(() => {
-    const query = {
-      where: {
-        origin: oAdd,
-        destination: dAdd
-      }
+  Routes.find({
+    origin: oAdd,
+    destination: dAdd
+  }, (err, routes) => {
+    if (err) {
+      res.statusCode = 400;
+      return res.send(err);
+    } else {
+      res.statusCode = 200;
+      return res.send(routes);
     }
-    Routes.findAll(query)
-      .then(data => {
-        const arr = [];
-        for (let i = 0; i < data.length; i += 1) {
-          arr.push(data[i].dataValues);
-        }
-        res.json(JSON.stringify(arr));
-      });
   });
 };
 
 db.delete = (req, res) => {
   const oAdd = req.param('oAdd');
   const dAdd = req.param('dAdd');
-  Routes.sync().then(() => {
-    const query = {
-      where: {
-        origin: oAdd,
-        destination: dAdd
-      }
+  Routes.remove({
+    origin: oAdd,
+    destination: dAdd
+  }, (err, routes) => {
+    if (err) {
+      res.statusCode = 400;
+      return res.send(err);
+    } else {
+      res.statusCode = 200;
+      return res.send(routes);
     }
-    Routes.destroy(query);
-    Routes.findAll()
-      .then(data => {
-        const arr = [];
-        for (let i = 0; i < data.length; i += 1) {
-          arr.push(data[i].dataValues);
-        }
-        res.json(JSON.stringify(arr));
-      });
   });
 };
 
