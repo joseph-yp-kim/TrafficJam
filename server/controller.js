@@ -32,8 +32,8 @@ db.findAll = (req, res) => {
 }
 
 db.find = (req, res) => {
-  const oAdd = req.param('oAdd');
-  const dAdd = req.param('dAdd');
+  const oAdd = req.params.oAdd;
+  const dAdd = req.params.dAdd;
   Routes.find({
     origin: oAdd,
     destination: dAdd
