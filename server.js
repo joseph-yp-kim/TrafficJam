@@ -11,6 +11,7 @@ app.use(express.static(`${__dirname}/client`));
 app.use(bodyparser.json());
 
 app.get('/', (req, res) => {
+  res.setHeader('Access-Control-Allow-Credentials', true);
   res.render('index');
 });
 
@@ -18,7 +19,9 @@ app.get('/routes', db.findAll);
 
 app.post('/routes', db.create);
 
-app.get('/route', db.find);
+app.get('/route/:oAdd/:dAdd', db.find);
+
+app.post('/directions', db.directions);
 
 app.delete('/route', db.delete);
 
