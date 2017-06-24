@@ -71,25 +71,32 @@ class App extends Component {
     } else if (!this.state.inputInfo.originInput.state || !this.state.inputInfo.destinationInput.state) {
       this.setState({errorDisplay: true});
     } else {
-      const url = `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.streetNum}+${origin.street}+${origin.city}+${origin.state}&destination=${destination.streetNum}+${destination.street}+${destination.city}+${destination.state}&departure_time=now&key=AIzaSyAyfCjnOQZeHPfVgw0JEBwDPFxsbVKEzkc`;
-      console.log(url);
-      fetch(url)
-        .then((res) => res.json())
-        .then((resJSON) => {
-          console.log(resJSON);
-          this.setState({
-            errorDisplay : false,
-            routeDisplay : true,
-            travelInfo : {
-              oAddress : resJSON.routes[0].legs[0].start_address,
-              dAddress : resJSON.routes[0].legs[0].end_address,
-              liveTime : this.strToNum(resJSON.routes[0].legs[0].duration_in_traffic.text),
-              normalTime : this.strToNum(resJSON.routes[0].legs[0].duration.text),
-              distance : parseInt(resJSON.routes[0].legs[0].distance.text)
-            }
-          });
-          // console.log(this.state.travelInfo);
+      fetch('/directions', {
+        method: 'POST',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          url: `https://maps.googleapis.com/maps/api/directions/json?origin=${origin.streetNum}+${origin.street}+${origin.city}+${origin.state}&destination=${destination.streetNum}+${destination.street}+${destination.city}+${destination.state}&departure_time=now&key=AIzaSyAyfCjnOQZeHPfVgw0JEBwDPFxsbVKEzkc`
+        })
+      })
+      .then((res) => res.json())
+      .then((resJSON) => {
+        const data = JSON.parse(resJSON);
+        // console.log(resJSON);
+        this.setState({
+          errorDisplay : false,
+          routeDisplay : true,
+          travelInfo : {
+            oAddress : data.routes[0].legs[0].start_address,
+            dAddress : data.routes[0].legs[0].end_address,
+            liveTime : this.strToNum(data.routes[0].legs[0].duration_in_traffic.text),
+            normalTime : this.strToNum(data.routes[0].legs[0].duration.text),
+            distance : parseInt(data.routes[0].legs[0].distance.text)
+          }
         });
+      });
     }
   }
 
@@ -166,7 +173,10 @@ class App extends Component {
   }
 
   getRouteData() {
+    console.log('requesting:',this.state.selectedRoute.origin);
+    console.log('requesting:',this.state.selectedRoute.destination);
     const url1 = `/route?oAdd=${this.state.selectedRoute.origin}&dAdd=${this.state.selectedRoute.destination}`;
+    console.log(url1);
     fetch(url1, {
       method: 'GET',
       headers: {
@@ -176,6 +186,7 @@ class App extends Component {
     })
     .then(res => res.json())
     .then(resJSON => {
+
       this.setState({
         errorDisplay: false,
         dataDisplay : true,
@@ -200,23 +211,10 @@ class App extends Component {
     });
   }
 
-  strToNum(str) {
-    const splitIndx = str.indexOf('r');
-    let output;
-    if (splitIndx === -1) {
-      output = parseInt(str);
-    } else {
-      const hour = str.slice(0, splitIndx + 2);
-      const min = str.slice(splitIndx + 2, str.length);
-      output = parseInt(hour) * 60 + parseInt(min);
-    }
-    return output;
-  }
-
   render() {
     const appDiv = [];
     appDiv.push(<h1 id="title">Traffic Jam</h1>);
-    appDiv.push(<InputFormContainer handleOInputChange={this.handleOInputChange} handleDInputChange={this.handleDInputChange} />);
+    appDiv.push(<InputFormContainer key={0} handleOInputChange={this.handleOInputChange} handleDInputChange={this.handleDInputChange} />);
     appDiv.push(<ButtonContainer handleClick={this.handleClick} />);
     if (this.state.errorDisplay === true) {
       appDiv.push(<ErrorMessage />);
@@ -234,6 +232,28 @@ class App extends Component {
       <div>{appDiv}</div>
     );
   }
+
+  // ----------------- helper functions -----------------
+  
+  strToNum(str) {
+    const splitIndx = str.indexOf('r');
+    let output;
+    if (splitIndx === -1) {
+      output = parseInt(str);
+    } else {
+      const hour = str.slice(0, splitIndx + 2);
+      const min = str.slice(splitIndx + 2, str.length);
+      output = parseInt(hour) * 60 + parseInt(min);
+    }
+    return output;
+  }
+
+  // Helper method to parse the title tag from the response.
+  getTitle(text) {
+    return text.match('<title>(.*)?</title>')[1];
+  }
+
+  // -----------------------------------------------------
 }
 
 export default App;

@@ -12,6 +12,7 @@ class DataContainer extends Component {
     for (let i = 0; i < this.props.data.length; i += 1) {
       dataRows.push(<DataTableRow key={i} data={this.props.data[i]} />)
     }
+    console.log('data:', this.props.data);
     return (
       <div id="data_container">
         <table id="data_table">
